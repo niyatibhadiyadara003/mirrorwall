@@ -16,6 +16,7 @@ class _PrimepageState extends State<Primepage> {
 
   String url = "";
   double progress = 0;
+  Uri? uri;
 
   List Bookmarks = [];
 
@@ -66,47 +67,58 @@ class _PrimepageState extends State<Primepage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: Text("Amazon Prime"),
+        appBar: AppBar(
+          title: Text("Amazon Prime"),
           backgroundColor: Colors.cyan,
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.arrow_back_ios_outlined,
-              color: Colors.grey.shade700,
-            ),
-            onPressed: () async {
-              await webViewController!.goBack();
-            },
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.refresh_sharp,
-              color: Colors.grey.shade700,
-            ),
-            onPressed: () async {
-              if (Platform.isAndroid) {
-                await webViewController!.reload();
-              } else if (Platform.isIOS) {
-                await webViewController!.loadUrl(
-                  urlRequest: URLRequest(
-                    url: Uri.parse(
-                      "${await webViewController?.getUrl()}",
+          actions: [
+            (uri != null)
+                ? IconButton(
+                    icon: Icon(
+                      Icons.arrow_back_ios_outlined,
+                      color: Colors.grey.shade700,
                     ),
-                  ),
-                );
-              }
-            },
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.arrow_forward_ios,
-              color: Colors.grey.shade700,
+                    onPressed: () async {
+                      await webViewController!.goBack();
+                    },
+                  )
+                : Container(),
+            const SizedBox(
+              width: 10,
             ),
-            onPressed: () async {
-              await webViewController!.goForward();
-            },
-          ),
-        ],
+            IconButton(
+              icon: Icon(
+                Icons.refresh_sharp,
+                color: Colors.grey.shade700,
+              ),
+              onPressed: () async {
+                if (Platform.isAndroid) {
+                  await webViewController!.reload();
+                } else if (Platform.isIOS) {
+                  await webViewController!.loadUrl(
+                    urlRequest: URLRequest(
+                      url: Uri.parse(
+                        "${await webViewController?.getUrl()}",
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            (uri != null)
+                ? IconButton(
+                    icon: Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.grey.shade700,
+                    ),
+                    onPressed: () async {
+                      await webViewController!.goForward();
+                    },
+                  )
+                : Container(),
+          ],
         ),
         body: Column(
           children: [
@@ -141,8 +153,8 @@ class _PrimepageState extends State<Primepage> {
                   ),
                 ),
                 onSubmitted: (val) async {
-                  Uri uri = Uri.parse(val);
-                  if (uri.scheme.isEmpty) {
+                  uri = Uri.parse(val);
+                  if (uri!.scheme.isEmpty) {
                     uri = Uri.parse("https://www.google.com/search?q=" + val);
                   }
                   await webViewController!.loadUrl(
@@ -153,8 +165,8 @@ class _PrimepageState extends State<Primepage> {
             ),
             (progress < 1)
                 ? LinearProgressIndicator(
-              value: progress,
-            )
+                    value: progress,
+                  )
                 : Container(),
             Expanded(
               flex: 11,
@@ -209,10 +221,8 @@ class _PrimepageState extends State<Primepage> {
               ),
               onPressed: () async {
                 Uri? uri = await webViewController!.getUrl();
-                String MyURL = uri!.scheme.toString() +
-                    "://" +
-                    uri.host +
-                    uri.path;
+                String MyURL =
+                    uri!.scheme.toString() + "://" + uri.host + uri.path;
 
                 setState(() {
                   Bookmarks.add(MyURL);
@@ -220,14 +230,15 @@ class _PrimepageState extends State<Primepage> {
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content:
-                    Text("Added Successfully in Bookmark .. !!"),
+                    content: Text("Added Successfully in Bookmark .. !!"),
                     duration: Duration(milliseconds: 500),
                   ),
                 );
               },
             ),
-            const SizedBox(width: 10,),
+            const SizedBox(
+              width: 10,
+            ),
             IconButton(
               icon: Icon(
                 Icons.list_alt_outlined,
@@ -246,7 +257,7 @@ class _PrimepageState extends State<Primepage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: Bookmarks.map(
-                              (e) => Padding(
+                          (e) => Padding(
                             padding: const EdgeInsets.all(12),
                             child: GestureDetector(
                               onTap: () async {
@@ -267,7 +278,9 @@ class _PrimepageState extends State<Primepage> {
                 );
               },
             ),
-            const SizedBox(width: 10,),
+            const SizedBox(
+              width: 10,
+            ),
           ],
         ),
         resizeToAvoidBottomInset: false,

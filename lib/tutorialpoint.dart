@@ -16,6 +16,7 @@ class _TutorialPointState extends State<TutorialPoint> {
 
   String url = "";
   double progress = 0;
+  Uri? uri;
 
   List Bookmarks = [];
 
@@ -66,19 +67,24 @@ class _TutorialPointState extends State<TutorialPoint> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: Text("TutorialPoint"),
+        appBar: AppBar(
+          title: Text("TutorialPoint"),
           backgroundColor: Colors.cyan,
           actions: [
-            IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios_outlined,
-                color: Colors.grey.shade700,
-              ),
-              onPressed: () async {
-                await webViewController!.goBack();
-              },
+            (uri != null)
+                ? IconButton(
+                    icon: Icon(
+                      Icons.arrow_back_ios_outlined,
+                      color: Colors.grey.shade700,
+                    ),
+                    onPressed: () async {
+                      await webViewController!.goBack();
+                    },
+                  )
+                : Container(),
+            const SizedBox(
+              width: 10,
             ),
-            const SizedBox(width: 10,),
             IconButton(
               icon: Icon(
                 Icons.refresh_sharp,
@@ -98,17 +104,22 @@ class _TutorialPointState extends State<TutorialPoint> {
                 }
               },
             ),
-            const SizedBox(width: 10,),
-            IconButton(
-              icon: Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.grey.shade700,
-              ),
-              onPressed: () async {
-                await webViewController!.goForward();
-              },
+            const SizedBox(
+              width: 10,
             ),
-          ],),
+            (uri != null)
+                ? IconButton(
+                    icon: Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.grey.shade700,
+                    ),
+                    onPressed: () async {
+                      await webViewController!.goForward();
+                    },
+                  )
+                : Container(),
+          ],
+        ),
         body: Column(
           children: [
             Expanded(
@@ -142,8 +153,8 @@ class _TutorialPointState extends State<TutorialPoint> {
                   ),
                 ),
                 onSubmitted: (val) async {
-                  Uri uri = Uri.parse(val);
-                  if (uri.scheme.isEmpty) {
+                  uri = Uri.parse(val);
+                  if (uri!.scheme.isEmpty) {
                     uri = Uri.parse("https://www.google.com/search?q=" + val);
                   }
                   await webViewController!.loadUrl(
@@ -154,8 +165,8 @@ class _TutorialPointState extends State<TutorialPoint> {
             ),
             (progress < 1)
                 ? LinearProgressIndicator(
-              value: progress,
-            )
+                    value: progress,
+                  )
                 : Container(),
             Expanded(
               flex: 11,
@@ -210,10 +221,8 @@ class _TutorialPointState extends State<TutorialPoint> {
               ),
               onPressed: () async {
                 Uri? uri = await webViewController!.getUrl();
-                String MyURL = uri!.scheme.toString() +
-                    "://" +
-                    uri.host +
-                    uri.path;
+                String MyURL =
+                    uri!.scheme.toString() + "://" + uri.host + uri.path;
 
                 setState(() {
                   Bookmarks.add(MyURL);
@@ -221,14 +230,15 @@ class _TutorialPointState extends State<TutorialPoint> {
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content:
-                    Text("Added Successfully in Bookmark .. !!"),
+                    content: Text("Added Successfully in Bookmark .. !!"),
                     duration: Duration(milliseconds: 500),
                   ),
                 );
               },
             ),
-            const SizedBox(width: 10,),
+            const SizedBox(
+              width: 10,
+            ),
             IconButton(
               icon: Icon(
                 Icons.list_alt_outlined,
@@ -247,7 +257,7 @@ class _TutorialPointState extends State<TutorialPoint> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: Bookmarks.map(
-                              (e) => Padding(
+                          (e) => Padding(
                             padding: const EdgeInsets.all(12),
                             child: GestureDetector(
                               onTap: () async {
@@ -268,8 +278,9 @@ class _TutorialPointState extends State<TutorialPoint> {
                 );
               },
             ),
-            const SizedBox(width: 10,),
-
+            const SizedBox(
+              width: 10,
+            ),
           ],
         ),
         resizeToAvoidBottomInset: false,

@@ -11,12 +11,12 @@ class Netflixpage extends StatefulWidget {
 }
 
 class _NetflixpageState extends State<Netflixpage> {
-
   final GlobalKey NetflixKey = GlobalKey();
   final TextEditingController searchController = TextEditingController();
 
   String url = "";
   double progress = 0;
+  Uri? uri;
 
   List Bookmarks = [];
 
@@ -67,49 +67,59 @@ class _NetflixpageState extends State<Netflixpage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: Text("Netflix"),
+        appBar: AppBar(
+          title: Text("Netflix"),
           backgroundColor: Colors.cyan,
           actions: [
-          IconButton(
-          icon: Icon(
-          Icons.arrow_back_ios_outlined,
-          color: Colors.grey.shade700,
-        ),
-        onPressed: () async {
-          await webViewController!.goBack();
-        },
-      ),
-      const SizedBox(width: 10,),
-      IconButton(
-        icon: Icon(
-          Icons.refresh_sharp,
-          color: Colors.grey.shade700,
-        ),
-        onPressed: () async {
-          if (Platform.isAndroid) {
-            await webViewController!.reload();
-          } else if (Platform.isIOS) {
-            await webViewController!.loadUrl(
-              urlRequest: URLRequest(
-                url: Uri.parse(
-                  "${await webViewController?.getUrl()}",
-                ),
+            (uri != null)
+                ? IconButton(
+                    icon: Icon(
+                      Icons.arrow_back_ios_outlined,
+                      color: Colors.grey.shade700,
+                    ),
+                    onPressed: () async {
+                      await webViewController!.goBack();
+                    },
+                  )
+                : Container(),
+            const SizedBox(
+              width: 10,
+            ),
+            IconButton(
+              icon: Icon(
+                Icons.refresh_sharp,
+                color: Colors.grey.shade700,
               ),
-            );
-          }
-        },
-      ),
-      const SizedBox(width: 10,),
-      IconButton(
-        icon: Icon(
-          Icons.arrow_forward_ios,
-          color: Colors.grey.shade700,
+              onPressed: () async {
+                if (Platform.isAndroid) {
+                  await webViewController!.reload();
+                } else if (Platform.isIOS) {
+                  await webViewController!.loadUrl(
+                    urlRequest: URLRequest(
+                      url: Uri.parse(
+                        "${await webViewController?.getUrl()}",
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            (uri != null)
+                ? IconButton(
+                    icon: Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.grey.shade700,
+                    ),
+                    onPressed: () async {
+                      await webViewController!.goForward();
+                    },
+                  )
+                : Container(),
+          ],
         ),
-        onPressed: () async {
-          await webViewController!.goForward();
-        },
-      ),
-      ],),
         body: Column(
           children: [
             Expanded(
@@ -143,8 +153,8 @@ class _NetflixpageState extends State<Netflixpage> {
                   ),
                 ),
                 onSubmitted: (val) async {
-                  Uri uri = Uri.parse(val);
-                  if (uri.scheme.isEmpty) {
+                  uri = Uri.parse(val);
+                  if (uri!.scheme.isEmpty) {
                     uri = Uri.parse("https://www.google.com/search?q=" + val);
                   }
                   await webViewController!.loadUrl(
@@ -155,8 +165,8 @@ class _NetflixpageState extends State<Netflixpage> {
             ),
             (progress < 1)
                 ? LinearProgressIndicator(
-              value: progress,
-            )
+                    value: progress,
+                  )
                 : Container(),
             Expanded(
               flex: 11,
@@ -211,10 +221,8 @@ class _NetflixpageState extends State<Netflixpage> {
               ),
               onPressed: () async {
                 Uri? uri = await webViewController!.getUrl();
-                String MyURL = uri!.scheme.toString() +
-                    "://" +
-                    uri.host +
-                    uri.path;
+                String MyURL =
+                    uri!.scheme.toString() + "://" + uri.host + uri.path;
 
                 setState(() {
                   Bookmarks.add(MyURL);
@@ -222,14 +230,15 @@ class _NetflixpageState extends State<Netflixpage> {
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content:
-                    Text("Added Successfully in Bookmark .. !!"),
+                    content: Text("Added Successfully in Bookmark .. !!"),
                     duration: Duration(milliseconds: 500),
                   ),
                 );
               },
             ),
-            const SizedBox(width: 10,),
+            const SizedBox(
+              width: 10,
+            ),
             IconButton(
               icon: Icon(
                 Icons.list_alt_outlined,
@@ -248,7 +257,7 @@ class _NetflixpageState extends State<Netflixpage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: Bookmarks.map(
-                              (e) => Padding(
+                          (e) => Padding(
                             padding: const EdgeInsets.all(12),
                             child: GestureDetector(
                               onTap: () async {
@@ -269,8 +278,9 @@ class _NetflixpageState extends State<Netflixpage> {
                 );
               },
             ),
-            const SizedBox(width: 10,),
-
+            const SizedBox(
+              width: 10,
+            ),
           ],
         ),
         resizeToAvoidBottomInset: false,

@@ -19,6 +19,8 @@ class _JavaPointState extends State<JavaPoint> {
 
   List Bookmarks = [];
 
+  Uri? uri;
+
   InAppWebViewController? webViewController;
   late PullToRefreshController pullToRefreshController;
 
@@ -66,19 +68,24 @@ class _JavaPointState extends State<JavaPoint> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: Text("JavaPoint"),
+        appBar: AppBar(
+          title: Text("JavaPoint"),
           backgroundColor: Colors.cyan,
           actions: [
-            IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios_outlined,
-                color: Colors.grey.shade700,
-              ),
-              onPressed: () async {
-                await webViewController!.goBack();
-              },
+            (uri != null)
+                ? IconButton(
+                    icon: Icon(
+                      Icons.arrow_back_ios_outlined,
+                      color: Colors.grey.shade700,
+                    ),
+                    onPressed: () async {
+                      await webViewController!.goBack();
+                    },
+                  )
+                : Container(),
+            const SizedBox(
+              width: 10,
             ),
-            const SizedBox(width: 10,),
             IconButton(
               icon: Icon(
                 Icons.refresh_sharp,
@@ -98,17 +105,22 @@ class _JavaPointState extends State<JavaPoint> {
                 }
               },
             ),
-            const SizedBox(width: 10,),
-            IconButton(
-              icon: Icon(
-                Icons.arrow_forward_ios,
-                color: Colors.grey.shade700,
-              ),
-              onPressed: () async {
-                await webViewController!.goForward();
-              },
+            const SizedBox(
+              width: 10,
             ),
-          ],),
+            (uri != null)
+                ? IconButton(
+                    icon: Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.grey.shade700,
+                    ),
+                    onPressed: () async {
+                      await webViewController!.goForward();
+                    },
+                  )
+                : Container(),
+          ],
+        ),
         body: Column(
           children: [
             Expanded(
@@ -142,8 +154,8 @@ class _JavaPointState extends State<JavaPoint> {
                   ),
                 ),
                 onSubmitted: (val) async {
-                  Uri uri = Uri.parse(val);
-                  if (uri.scheme.isEmpty) {
+                  uri = Uri.parse(val);
+                  if (uri!.scheme.isEmpty) {
                     uri = Uri.parse("https://www.google.com/search?q=" + val);
                   }
                   await webViewController!.loadUrl(
@@ -154,8 +166,8 @@ class _JavaPointState extends State<JavaPoint> {
             ),
             (progress < 1)
                 ? LinearProgressIndicator(
-              value: progress,
-            )
+                    value: progress,
+                  )
                 : Container(),
             Expanded(
               flex: 11,
@@ -210,10 +222,8 @@ class _JavaPointState extends State<JavaPoint> {
               ),
               onPressed: () async {
                 Uri? uri = await webViewController!.getUrl();
-                String MyURL = uri!.scheme.toString() +
-                    "://" +
-                    uri.host +
-                    uri.path;
+                String MyURL =
+                    uri!.scheme.toString() + "://" + uri.host + uri.path;
 
                 setState(() {
                   Bookmarks.add(MyURL);
@@ -221,14 +231,15 @@ class _JavaPointState extends State<JavaPoint> {
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content:
-                    Text("Added Successfully in Bookmark .. !!"),
+                    content: Text("Added Successfully in Bookmark .. !!"),
                     duration: Duration(milliseconds: 500),
                   ),
                 );
               },
             ),
-            const SizedBox(width: 10,),
+            const SizedBox(
+              width: 10,
+            ),
             IconButton(
               icon: Icon(
                 Icons.list_alt_outlined,
@@ -247,7 +258,7 @@ class _JavaPointState extends State<JavaPoint> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: Bookmarks.map(
-                              (e) => Padding(
+                          (e) => Padding(
                             padding: const EdgeInsets.all(12),
                             child: GestureDetector(
                               onTap: () async {
@@ -268,8 +279,9 @@ class _JavaPointState extends State<JavaPoint> {
                 );
               },
             ),
-            const SizedBox(width: 10,),
-
+            const SizedBox(
+              width: 10,
+            ),
           ],
         ),
         resizeToAvoidBottomInset: false,
